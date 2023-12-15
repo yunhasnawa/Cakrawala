@@ -33,8 +33,8 @@ class Config
             $line = explode('=', $line);
             if (count($line) == 2)
             {
-                $key = $line[0];
-                $value = $line[1];
+                $key = trim($line[0]);
+                $value = trim($line[1]);
                 $this->set($key, $value);
             }
         }
