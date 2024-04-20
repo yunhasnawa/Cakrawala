@@ -37,21 +37,23 @@ class Application
         return Application::$_instance;
     }
 
-    public function run()
+    public function run(): void
     {
         $this->_controller->{$this->_controllerMethod}();
     }
 
-    private function _retrieveMetadata()
+    private function _retrieveMetadata(): void
     {
         $appFolder = $this->_config->getAppFolder();
 
         $this->_host = $_SERVER['HTTP_HOST'];
         $this->_rootUrl = $_SERVER['REQUEST_SCHEME'] . '://' . $this->_host . $appFolder;
         $this->_route = str_replace("$appFolder/", '', $_SERVER['REQUEST_URI']);
+        if(str_contains($this->_route, '?'))
+            $this->_route = substr($this->_route, 0, strpos($this->_route, '?'));
     }
 
-    private function _resolveController()
+    private function _resolveController(): void
     {
         $split = explode('/', $this->_route);
 
@@ -71,7 +73,7 @@ class Application
         $this->_controller = new $controller($this);
     }
 
-    private function _resolveControllerMethod($routeSplit = array())
+    private function _resolveControllerMethod($routeSplit = array()): void
     {
         if(count($routeSplit) < 3)
             $method = 'index';
@@ -106,7 +108,7 @@ class Application
         return $this->_route;
     }
 
-    private function _importSiteSourceFiles()
+    private function _importSiteSourceFiles(): void
     {
         $files = [];
 
