@@ -19,12 +19,12 @@ class Config
         $this->_dbName = '';
     }
 
-    public function set($key, $value)
+    public function set($key, $value): void
     {
         $this->{'_' . $key} = $value;
     }
 
-    public function readEnvironment()
+    public function readEnvironment(): void
     {
         $env = file_get_contents('.env');
         $env = explode("\n", $env);
@@ -89,6 +89,4 @@ class Config
     {
         $this->_dbName = $dbName;
     }
-
-
 }

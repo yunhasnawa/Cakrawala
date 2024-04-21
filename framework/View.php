@@ -13,12 +13,12 @@ class View
         $this->_data = [];
     }
 
-    public function setData(array $data)
+    public function setData(array $data): void
     {
         $this->_data = $data;
     }
 
-    public function modifyData($index, $value)
+    public function modifyData($index, $value): void
     {
         $this->_data[$index] = $value;
     }
@@ -31,7 +31,7 @@ class View
             return $this->_data;
     }
 
-    public function render()
+    public function render(): void
     {
         require_once $this->_template;
     }

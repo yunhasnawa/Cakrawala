@@ -40,4 +40,9 @@ class Util
 
         return substr($haystack, -$length) === $needle;
     }
+
+    public static function baseUrl($next = ''): string
+    {
+        return Application::getInstance()->getRootUrl() . $next;
+    }
 }

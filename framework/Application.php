@@ -47,7 +47,7 @@ class Application
         $appFolder = $this->_config->getAppFolder();
 
         $this->_host = $_SERVER['HTTP_HOST'];
-        $this->_rootUrl = $_SERVER['REQUEST_SCHEME'] . '://' . $this->_host . $appFolder;
+        $this->_rootUrl = $_SERVER['REQUEST_SCHEME'] . '://' . $this->_host . '/' . $appFolder;
         $this->_route = str_replace("$appFolder/", '', $_SERVER['REQUEST_URI']);
         if(str_contains($this->_route, '?'))
             $this->_route = substr($this->_route, 0, strpos($this->_route, '?'));
