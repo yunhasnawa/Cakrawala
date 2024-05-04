@@ -12,16 +12,35 @@ require_once 'Controller.php';
 require_once 'View.php';
 require_once 'Model.php';
 
-function pre_print($data)
+function pre_print($data = array(), $die = false): void
 {
+    $trace = debug_backtrace();
+    $firstLevel = $trace[0];
+
+    $caller = "Data printed by: <strong>{$firstLevel['file']}</strong> on line <strong>{$firstLevel['line']}</strong>";
+
+    echo "<br/>$caller<br/>";
     echo '<pre>';
-    print_r($data);
-    echo '</pre>';
+    if($data === null)
+        echo 'Data is null.';
+    elseif ($data === '')
+        echo "Data is an empty string ('').";
+    else
+        print_r($data);
+    echo '</pre><br/>';
+
+    if($die)
+        die;
 }
 
-function error($message, $exit = true, $code = 1)
+function error($message, $exit = true, $code = 1): void
 {
-    echo '<h1>[ERROR] ' . $message . '</h1>';
+    $trace = debug_backtrace();
+    $firstLevel = $trace[0];
+
+    $caller = "[ERROR]: <strong>{$firstLevel['file']}</strong> on line <strong>{$firstLevel['line']}</strong>";
+    echo "<br/>$caller<br/>";
+    echo "<pre>$message</pre><br/>";
 
     if($exit)
         exit($code);

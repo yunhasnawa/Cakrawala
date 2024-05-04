@@ -17,10 +17,12 @@ class Application
 
     private Controller $_controller;
     private string $_controllerMethod;
+    private string $_moduleFolder;
 
     private function __construct()
     {
         $this->_config = new Config();
+
         $this->_config->readEnvironment();
 
         $this->_importSiteSourceFiles();
@@ -47,8 +49,19 @@ class Application
         $appFolder = $this->_config->getAppFolder();
 
         $this->_host = $_SERVER['HTTP_HOST'];
-        $this->_rootUrl = $_SERVER['REQUEST_SCHEME'] . '://' . $this->_host . '/' . $appFolder;
-        $this->_route = str_replace("$appFolder/", '', $_SERVER['REQUEST_URI']);
+        $this->_rootUrl = $_SERVER['REQUEST_SCHEME'] . '://' . $this->_host;
+        // Default `route` is request URI
+        $this->_route = $_SERVER['REQUEST_URI'];
+
+        // If the app has app folder, then the root URL and route should be adjusted by considering it
+        if($appFolder !== '')
+        {
+            // Root URL: http://localhost:8080 --> http://localhost:8080/app-folder
+            $this->_rootUrl .= $appFolder;
+            // Route: /app-folder/student --> /student
+            $this->_route = str_replace("/$appFolder", '/', $_SERVER['REQUEST_URI']);
+        }
+
         if(str_contains($this->_route, '?'))
             $this->_route = substr($this->_route, 0, strpos($this->_route, '?'));
     }
@@ -58,15 +71,11 @@ class Application
         $split = explode('/', $this->_route);
 
         $this->_resolveControllerMethod($split);
+        $this->_resolveModuleFolder($split);
 
-        $moduleFolder = $split[1];
+        $namespace = 'site\\' . $this->_moduleFolder;
 
-        if(empty($moduleFolder))
-            $moduleFolder = 'index';
-
-        $namespace = 'site\\' . $moduleFolder;
-
-        $className = ucfirst($moduleFolder) . '_Controller';
+        $className = ucfirst($this->_moduleFolder) . '_Controller';
 
         $controller = $namespace . '\\' . $className;
 
@@ -75,17 +84,25 @@ class Application
 
     private function _resolveControllerMethod($routeSplit = array()): void
     {
-        if(count($routeSplit) < 3)
+        if (count($routeSplit) < 3)
             $method = 'index';
         else
         {
-            if(empty($routeSplit[2]))
+            if (empty($routeSplit[2]))
                 $method = 'index';
             else
                 $method = $routeSplit[2];
         }
 
         $this->_controllerMethod = $method;
+    }
+
+    private function _resolveModuleFolder($routeSplit = array()): void
+    {
+        $this->_moduleFolder = count($routeSplit) > 1 ? $routeSplit[1] : '';
+
+        if(empty($this->_moduleFolder))
+            $this->_moduleFolder = 'index';
     }
 
     public function getConfig(): Config

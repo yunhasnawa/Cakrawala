@@ -14,7 +14,7 @@ abstract class Model
         $this->_initConnection();
     }
 
-    private function _initConnection()
+    private function _initConnection(): void
     {
         $config = Application::getInstance()->getConfig();
 
@@ -38,7 +38,7 @@ abstract class Model
         return $this->_connection;
     }
 
-    protected function executeRead($sql, $params = [])
+    protected function executeRead($sql, $params = []): false|array|null
     {
         $statement = $this->_connection->prepare($sql);
         $success = $statement->execute($params);

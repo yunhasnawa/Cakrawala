@@ -31,10 +31,11 @@ class Config
         foreach ($env as $line)
         {
             $line = explode('=', $line);
+
             if (count($line) == 2)
             {
                 $key = trim($line[0]);
-                $value = trim($line[1]);
+                $value = $line[1] === null ? '' : trim($line[1]);
                 $this->set($key, $value);
             }
         }
