@@ -11,6 +11,8 @@ require_once 'Application.php';
 require_once 'Controller.php';
 require_once 'View.php';
 require_once 'Model.php';
+require_once 'orm/Factory.php';
+require_once 'orm/Entity.php';
 
 function pre_print($data = array(), $die = false): void
 {

@@ -26,7 +26,7 @@ class View
     public function getData($index = null)
     {
         if ($index)
-            return $this->_data[$index];
+            return $this->_data[$index] ?? null;
         else
             return $this->_data;
     }

@@ -11,6 +11,7 @@ class Application
     private Config $_config;
 
     // Metadata
+    private string $_appFolder;
     private string $_host;
     private string $_rootUrl;
     private string $_route;
@@ -46,24 +47,37 @@ class Application
 
     private function _retrieveMetadata(): void
     {
-        $appFolder = $this->_config->getAppFolder();
+        $this->_appFolder = $this->_config->getAppFolder();
 
         $this->_host = $_SERVER['HTTP_HOST'];
-        $this->_rootUrl = $_SERVER['REQUEST_SCHEME'] . '://' . $this->_host;
+        $this->_rootUrl = $this->_requestScheme() . '://' . $this->_host;  // $_SERVER['REQUEST_SCHEME'] is not available in some servers
         // Default `route` is request URI
         $this->_route = $_SERVER['REQUEST_URI'];
 
         // If the app has app folder, then the root URL and route should be adjusted by considering it
-        if($appFolder !== '')
+        if($this->_appFolder !== '')
         {
             // Root URL: http://localhost:8080 --> http://localhost:8080/app-folder
-            $this->_rootUrl .= $appFolder;
+            $this->_rootUrl .= "/{$this->_appFolder}";  // <-- Notice it has '/' before $appFolder.
             // Route: /app-folder/student --> /student
-            $this->_route = str_replace("/$appFolder", '/', $_SERVER['REQUEST_URI']);
+            $this->_route = str_replace("/{$this->_appFolder}", '/', $_SERVER['REQUEST_URI']);
         }
 
         if(str_contains($this->_route, '?'))
             $this->_route = substr($this->_route, 0, strpos($this->_route, '?'));
+    }
+
+    private function _requestScheme(): string
+    {
+        if ( (! empty($_SERVER['REQUEST_SCHEME']) && $_SERVER['REQUEST_SCHEME'] == 'https') ||
+            (! empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] == 'on') ||
+            (! empty($_SERVER['SERVER_PORT']) && $_SERVER['SERVER_PORT'] == '443') ) {
+            $server_request_scheme = 'https';
+        } else {
+            $server_request_scheme = 'http';
+        }
+
+        return $server_request_scheme;
     }
 
     private function _resolveController(): void
@@ -84,14 +98,17 @@ class Application
 
     private function _resolveControllerMethod($routeSplit = array()): void
     {
-        if (count($routeSplit) < 3)
+        // If it has app folder: [host/app-folder/route/method], but if not: [host/route/method]
+        $minSplit = $this->_appFolder === '' ? 3 : 4;
+
+        if (count($routeSplit) < $minSplit)
             $method = 'index';
         else
         {
-            if (empty($routeSplit[2]))
+            if (empty($routeSplit[($minSplit - 1)]))  // [host/app-folder/route/] -> index();
                 $method = 'index';
             else
-                $method = $routeSplit[2];
+                $method = $routeSplit[($minSplit - 1)];  // [host/app-folder/route/method] -> method();
         }
 
         $this->_controllerMethod = $method;
@@ -99,7 +116,10 @@ class Application
 
     private function _resolveModuleFolder($routeSplit = array()): void
     {
-        $this->_moduleFolder = count($routeSplit) > 1 ? $routeSplit[1] : '';
+        // If it has app folder: [host/app-folder/route], but if not: [host/route]
+        $minSplit = $this->_appFolder === '' ? 1 : 2;
+
+        $this->_moduleFolder = count($routeSplit) > $minSplit ? $routeSplit[$minSplit] : '';
 
         if(empty($this->_moduleFolder))
             $this->_moduleFolder = 'index';

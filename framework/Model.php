@@ -16,8 +16,11 @@ abstract class Model
 
     private function _initConnection(): void
     {
-        $config = Application::getInstance()->getConfig();
+        $this->_connection = self::createDbConnection(Application::getInstance()->getConfig());
+    }
 
+    public static function createDbConnection(Config $config): ?PDO
+    {
         $dbHost     = $config->getDbHost();
         $dbName     = $config->getDbName();
         $dbUser     = $config->getDbUser();
@@ -25,11 +28,12 @@ abstract class Model
 
         try
         {
-            $this->_connection = new PDO("mysql:host=$dbHost;dbname=$dbName", $dbUser, $dbPassword);
+            return new PDO("mysql:host=$dbHost;dbname=$dbName", $dbUser, $dbPassword);
         }
         catch (PDOException $e)
         {
             error($e->getMessage());
+            return null;
         }
     }
 

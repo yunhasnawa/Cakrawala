@@ -9,6 +9,7 @@ class Config
     private string $_dbUser;
     private string $_dbPassword;
     private string $_dbName;
+    private string $_ormEntityDir;
 
     public function __construct()
     {
@@ -17,11 +18,13 @@ class Config
         $this->_dbUser = '';
         $this->_dbPassword = '';
         $this->_dbName = '';
+        $this->_ormEntityDir = '';
     }
 
     public function set($key, $value): void
     {
-        $this->{'_' . $key} = $value;
+        if(isset($this->{'_' . $key}))
+            $this->{'_' . $key} = $value;
     }
 
     public function readEnvironment(): void
@@ -89,5 +92,15 @@ class Config
     public function setDbName(string $dbName): void
     {
         $this->_dbName = $dbName;
+    }
+
+    public function getOrmEntityDir(): string
+    {
+        return $this->_ormEntityDir;
+    }
+
+    public function setOrmEntityDir(string $ormEntityDir): void
+    {
+        $this->_ormEntityDir = $ormEntityDir;
     }
 }
